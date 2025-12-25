@@ -5,7 +5,6 @@
   <title>Smart Traffic Management Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -19,13 +18,7 @@
       --danger: #ff5252;
       --border-subtle: #1e2435;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: radial-gradient(circle at top, #171b3b 0, #050816 55%);
@@ -33,261 +26,121 @@
       min-height: 100vh;
       padding: 20px;
     }
+    .app { max-width: 1200px; margin: 0 auto; }
 
-    .app {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* HEADER */
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
     }
-
-    .title-block {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .title {
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .title-block { display: flex; flex-direction: column; gap: 4px; }
+    .title { font-size: 26px; font-weight: 700; letter-spacing: 0.04em; display: flex; align-items: center; gap: 10px; }
     .title-pill {
-      font-size: 12px;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      background: rgba(0, 230, 118, 0.09);
+      font-size: 12px; text-transform: uppercase; padding: 2px 8px; border-radius: 999px;
+      border: 1px solid var(--accent); color: var(--accent); background: rgba(0, 230, 118, 0.09);
     }
-
-    .subtitle {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
+    .subtitle { font-size: 13px; color: var(--text-muted); }
 
     .status-chip {
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(76, 175, 80, 0.08);
-      color: #81c784;
-      border: 1px solid rgba(76, 175, 80, 0.4);
+      padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(76, 175, 80, 0.08); color: #81c784; border: 1px solid rgba(76, 175, 80, 0.4);
     }
-
     .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #00e676;
+      width: 8px; height: 8px; border-radius: 999px; background: #00e676;
       box-shadow: 0 0 10px rgba(0, 230, 118, 0.8);
     }
 
-    /* LAYOUT */
-    .grid {
-      display: grid;
-      grid-template-columns: 2fr 1.1fr;
-      gap: 20px;
-    }
-
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    .grid { display: grid; grid-template-columns: 2fr 1.1fr; gap: 20px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
     .card {
-      background: rgba(12, 18, 38, 0.96);
-      border-radius: 16px;
-      padding: 16px 18px 18px;
+      background: rgba(12, 18, 38, 0.96); border-radius: 16px; padding: 16px 18px 18px;
       border: 1px solid var(--border-subtle);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(16px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55); backdrop-filter: blur(16px);
     }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .card-title { font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+    .card-tag { font-size: 11px; text-transform: uppercase; padding: 3px 8px; border-radius: 999px;
+      border: 1px solid rgba(158, 158, 158, 0.25); color: var(--text-muted); }
 
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .card-title {
-      font-size: 14px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .card-tag {
-      font-size: 11px;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(158, 158, 158, 0.25);
-      color: var(--text-muted);
-    }
-
-    /* LIVE IMAGE */
     .image-wrapper {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
+      position: relative; border-radius: 12px; overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.05);
       background: radial-gradient(circle at top, #192842 0, #050814 60%);
-      min-height: 280px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      min-height: 280px; display: flex; align-items: center; justify-content: center;
     }
-
-    #trafficImage {
-      width: 100%;
-      display: block;
-      object-fit: cover;
-    }
-
+    #trafficImage { width: 100%; display: block; object-fit: cover; }
     .image-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.55);
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      position: absolute; top: 10px; left: 10px; padding: 4px 10px; border-radius: 999px;
+      background: rgba(0, 0, 0, 0.55); font-size: 11px; display: flex; align-items: center; gap: 6px;
     }
-
     .blink-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 999px;
-      background: #ff5252;
-      box-shadow: 0 0 8px rgba(255, 82, 82, 0.8);
-      animation: pulse 1.2s infinite;
+      width: 7px; height: 7px; border-radius: 999px; background: #ff5252;
+      box-shadow: 0 0 8px rgba(255, 82, 82, 0.8); animation: pulse 1.2s infinite;
     }
-
     @keyframes pulse {
       0% { transform: scale(1); opacity: 0.9; }
       50% { transform: scale(1.4); opacity: 0.3; }
       100% { transform: scale(1); opacity: 0.9; }
     }
 
-    /* METRICS */
-    .metrics-column {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    .metrics-column { display: flex; flex-direction: column; gap: 16px; }
 
     .metric-card {
       background: linear-gradient(135deg, rgba(0, 230, 118, 0.05), rgba(0, 0, 0, 0.2));
-      border-radius: 14px;
-      padding: 14px 14px 14px;
-      border: 1px solid rgba(0, 230, 118, 0.2);
+      border-radius: 14px; padding: 14px; border: 1px solid rgba(0, 230, 118, 0.2);
     }
-
     .metric-label {
-      font-size: 12px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      letter-spacing: 0.14em;
-      margin-bottom: 4px;
+      font-size: 12px; text-transform: uppercase; color: var(--text-muted);
+      letter-spacing: 0.14em; margin-bottom: 4px;
     }
+    .metric-value { font-size: 30px; font-weight: 600; margin-bottom: 2px; }
+    .metric-sub { font-size: 12px; color: var(--text-muted); }
 
-    .metric-value {
-      font-size: 30px;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-
-    .metric-sub {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
     .pill {
-      font-size: 11px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      color: #cbd5f5;
+      font-size: 11px; padding: 3px 9px; border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(148, 163, 184, 0.35); color: #cbd5f5;
     }
-
     .pill-accent {
-      border-color: rgba(0, 230, 118, 0.5);
-      color: #b9f6ca;
-      background: rgba(0, 230, 118, 0.07);
+      border-color: rgba(0, 230, 118, 0.5); color: #b9f6ca; background: rgba(0, 230, 118, 0.07);
     }
 
-    .alert-card {
-      background: radial-gradient(circle at left, rgba(239, 83, 80, 0.2), rgba(15, 23, 42, 0.95));
-      border-radius: 14px;
-      padding: 12px 14px;
-      border: 1px solid rgba(239, 83, 80, 0.45);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .traffic-light {
+      margin-top: 12px; display: flex; align-items: center; gap: 16px;
+    }
+    .light-body {
+      width: 60px; background: #020617; border-radius: 999px; padding: 8px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      display: flex; flex-direction: column; gap: 6px; align-items: center;
+    }
+    .bulb {
+      width: 24px; height: 24px; border-radius: 999px; background: #111827;
+      border: 2px solid #1f2937; opacity: 0.25;
+    }
+    .bulb.red.active {
+      background: #ef4444; border-color: #fecaca; opacity: 1;
+      box-shadow: 0 0 16px rgba(248, 113, 113, 0.9);
+    }
+    .bulb.yellow.active {
+      background: #facc15; border-color: #fef3c7; opacity: 1;
+      box-shadow: 0 0 16px rgba(250, 204, 21, 0.9);
+    }
+    .bulb.green.active {
+      background: #22c55e; border-color: #bbf7d0; opacity: 1;
+      box-shadow: 0 0 16px rgba(34, 197, 94, 0.9);
     }
 
-    .alert-title {
-      font-size: 12px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: #ffab91;
-    }
-
-    .alert-body {
-      font-size: 13px;
-      color: #ffece7;
-    }
+    .phase-info { display: flex; flex-direction: column; gap: 4px; }
 
     .footer {
-      margin-top: 16px;
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      border-top: 1px solid rgba(148, 163, 184, 0.25);
-      padding-top: 10px;
-      margin-top: 20px;
-    }
-
-    .footer span {
-      opacity: 0.85;
+      margin-top: 16px; font-size: 11px; color: var(--text-muted);
+      display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+      border-top: 1px solid rgba(148, 163, 184, 0.25); padding-top: 10px; margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <!-- HEADER -->
     <div class="header">
       <div class="title-block">
         <div class="title">
@@ -295,7 +148,7 @@
           <span class="title-pill">Adaptive Signal · YOLO</span>
         </div>
         <div class="subtitle">
-          Live traffic density analysis and dynamic signal timing based on real-time vehicle counts.
+          Real-time vehicle detection, multi-direction queue sensing, and dynamic signal timing.
         </div>
       </div>
       <div class="status-chip">
@@ -304,9 +157,8 @@
       </div>
     </div>
 
-    <!-- MAIN GRID -->
     <div class="grid">
-      <!-- Left: Live Feed -->
+      <!-- Left: Live Video -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">Intersection Camera</div>
@@ -315,103 +167,125 @@
         <div class="image-wrapper">
           <div class="image-badge">
             <span class="blink-dot"></span>
-            Live analytical frame
+            Live analytical frame (NS top, EW bottom)
           </div>
           <img id="trafficImage" src="" alt="Traffic frame will appear here">
         </div>
       </div>
 
-      <!-- Right: Metrics -->
+      <!-- Right: Metrics & Signal -->
       <div class="metrics-column">
         <div class="card">
           <div class="card-header">
             <div class="card-title">Signal Controller</div>
-            <div class="card-tag">Junction A · Phase NS</div>
+            <div class="card-tag" id="phaseLabel">Phase: -</div>
           </div>
 
           <div class="metric-card">
-            <div class="metric-label">Vehicle Volume</div>
-            <div id="vehicleCount" class="metric-value">-</div>
-            <div class="metric-sub" id="volumeText">Waiting for detector...</div>
-            <div class="pill-row">
-              <span class="pill">Detection model: YOLOv3 · COCO</span>
-              <span class="pill">Input: CCTV frames</span>
-            </div>
+            <div class="metric-label">North–South Volume</div>
+            <div id="vehicleCountNS" class="metric-value">-</div>
+            <div class="metric-sub">Vehicles detected in upper half of frame.</div>
           </div>
 
-          <div class="metric-card" style="margin-top: 12px;">
-            <div class="metric-label">Allocated Green Time</div>
-            <div id="greenTime" class="metric-value">- s</div>
-            <div class="metric-sub" id="greenText">Rule: 30s base + 2s per vehicle</div>
-            <div class="pill-row">
+          <div class="metric-card" style="margin-top: 10px;">
+            <div class="metric-label">East–West Volume</div>
+            <div id="vehicleCountEW" class="metric-value">-</div>
+            <div class="metric-sub">Vehicles detected in lower half of frame.</div>
+          </div>
+
+          <div class="metric-card" style="margin-top: 10px;">
+            <div class="metric-label">Current Phase Allocation</div>
+            <div class="traffic-light">
+              <div class="light-body">
+                <div id="bulbRed" class="bulb red"></div>
+                <div id="bulbYellow" class="bulb yellow"></div>
+                <div id="bulbGreen" class="bulb green"></div>
+              </div>
+              <div class="phase-info">
+                <div class="metric-sub">Active direction:</div>
+                <div id="phaseText" class="metric-value" style="font-size: 22px;">-</div>
+                <div class="metric-sub">
+                  Remaining: <span id="remainingTime">- s</span> · Green window: <span id="greenTime">- s</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pill-row" style="margin-top: 10px;">
               <span class="pill pill-accent" id="loadStatus">Load: -</span>
-              <span class="pill">Direction: North-South</span>
-            </div>
-          </div>
-
-          <div class="alert-card" style="margin-top: 12px;" id="alertBox">
-            <div class="alert-title">System Advisory</div>
-            <div class="alert-body" id="alertText">
-              System is warming up. Capture and detection services will adjust timings automatically.
+              <span class="pill">Rule: 30s base + 2s per vehicle</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- FOOTER -->
     <div class="footer">
-      <span>Engine: Python · OpenCV · YOLO · Flask</span>
-      <span>Adaptive rule: 30s + 2s × vehicle count · Real-time refresh every 2s</span>
+      <span>Engine: Python · OpenCV · YOLOv3 · Flask</span>
+      <span>Adaptive control: NS/EW queue sensing · Logged to data/logs/cycles.csv</span>
     </div>
   </div>
 
   <script>
+    function updateTrafficLight(phase) {
+      const red = document.getElementById('bulbRed');
+      const yellow = document.getElementById('bulbYellow');
+      const green = document.getElementById('bulbGreen');
+
+      red.classList.remove('active');
+      yellow.classList.remove('active');
+      green.classList.remove('active');
+
+      if (phase === 'NS') {
+        green.classList.add('active');
+      } else if (phase === 'EW') {
+        green.classList.add('active');
+      } else {
+        red.classList.add('active');
+      }
+    }
+
+    function loadCategory(ns, ew) {
+      const total = ns + ew;
+      if (total === 0) return "FREE";
+      if (total <= 5) return "LIGHT";
+      if (total <= 15) return "MODERATE";
+      return "HEAVY";
+    }
+
     async function updateStatus() {
       try {
         const res = await fetch('/status');
         if (!res.ok) throw new Error('Status fetch failed');
         const data = await res.json();
 
-        const count = data.vehicle_count || 0;
-        const greenTime = data.green_time || 0;
+        const ns = data.vehicle_count_ns || 0;
+        const ew = data.vehicle_count_ew || 0;
+        const phase = data.phase || "-";
+        const remaining = data.remaining_time ?? "-";
+        const greenTime = data.green_time ?? "-";
         const hasImage = data.has_image;
 
-        // Main values
-        document.getElementById('vehicleCount').textContent = count;
+        document.getElementById('vehicleCountNS').textContent = ns;
+        document.getElementById('vehicleCountEW').textContent = ew;
+        document.getElementById('phaseText').textContent =
+          phase === "NS" ? "North–South" : phase === "EW" ? "East–West" : "-";
+        document.getElementById('phaseLabel').textContent =
+          "Phase: " + (phase === "NS" ? "North–South" : phase === "EW" ? "East–West" : "-");
+        document.getElementById('remainingTime').textContent = remaining + " s";
         document.getElementById('greenTime').textContent = greenTime + " s";
 
-        // Traffic load label
+        const load = loadCategory(ns, ew);
         const loadStatus = document.getElementById('loadStatus');
-        const volumeText = document.getElementById('volumeText');
-        const alertText = document.getElementById('alertText');
-        const cameraStatus = document.getElementById('cameraStatus');
+        loadStatus.textContent = "Load: " + load;
 
         if (hasImage) {
           document.getElementById('trafficImage').src = '/image?ts=' + Date.now();
-          cameraStatus.textContent = "Feed: Live";
+          document.getElementById('cameraStatus').textContent = "Feed: Live";
         } else {
-          cameraStatus.textContent = "Feed: No frames yet";
+          document.getElementById('cameraStatus').textContent = "Feed: No frames yet";
         }
 
-        if (count === 0) {
-          loadStatus.textContent = "Load: Free-flow";
-          volumeText.textContent = "No vehicles detected in the current analytical frame.";
-          alertText.textContent = "Signals can safely operate on minimum cycle time in this phase.";
-        } else if (count <= 5) {
-          loadStatus.textContent = "Load: Light";
-          volumeText.textContent = "Low volume conditions – adaptive timing making small adjustments.";
-          alertText.textContent = "System prioritises smooth flow without over-allocating green time.";
-        } else if (count <= 15) {
-          loadStatus.textContent = "Load: Moderate";
-          volumeText.textContent = "Moderate traffic density – extension of green phase ongoing.";
-          alertText.textContent = "Dynamic green extension helps clear built-up queues efficiently.";
-        } else {
-          loadStatus.textContent = "Load: Heavy";
-          volumeText.textContent = "High vehicle density detected – maximum green window being utilised.";
-          alertText.textContent = "Consider coordination with adjacent junctions for corridor-level optimisation.";
-        }
-
+        updateTrafficLight(phase);
       } catch (e) {
         console.error(e);
         document.getElementById('cameraStatus').textContent = "Feed: Offline";
