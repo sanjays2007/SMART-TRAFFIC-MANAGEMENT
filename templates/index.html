@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <title>Smart Traffic Management Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --bg-main: #050816;
@@ -26,7 +24,7 @@
       min-height: 100vh;
       padding: 20px;
     }
-    .app { max-width: 1200px; margin: 0 auto; }
+    .app { max-width: 1400px; margin: 0 auto; }
 
     .header {
       display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
@@ -132,10 +130,49 @@
 
     .phase-info { display: flex; flex-direction: column; gap: 4px; }
 
+    /* HISTORY WIDGET STYLES */
+    .history-card {
+      grid-column: 1 / -1;
+      background: rgba(12, 18, 38, 0.96);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(16px);
+      margin-top: 20px;
+    }
+    .history-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+    }
+    .history-title { font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+    .history-table {
+      width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.02);
+      border-radius: 12px; overflow: hidden;
+    }
+    .history-table th {
+      background: rgba(0, 230, 118, 0.1); color: var(--text-main);
+      padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600;
+      letter-spacing: 0.08em; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .history-table td {
+      padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 13px;
+    }
+    .history-table tr:hover {
+      background: rgba(0, 230, 118, 0.05);
+    }
+    .history-empty {
+      text-align: center; padding: 40px; color: var(--text-muted);
+      font-style: italic;
+    }
+    .history-footer {
+      text-align: center; margin-top: 12px; font-size: 11px; color: var(--text-muted);
+    }
+
     .footer {
-      margin-top: 16px; font-size: 11px; color: var(--text-muted);
+      margin-top: 32px; font-size: 11px; color: var(--text-muted);
       display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
-      border-top: 1px solid rgba(148, 163, 184, 0.25); padding-top: 10px; margin-top: 20px;
+      border-top: 1px solid rgba(148, 163, 184, 0.25); padding-top: 16px;
     }
   </style>
 </head>
@@ -219,9 +256,34 @@
       </div>
     </div>
 
+    <!-- HISTORY WIDGET -->
+    <div class="history-card">
+      <div class="history-header">
+        <div class="history-title">📊 Traffic Cycle History</div>
+        <div class="card-tag">Last 10 cycles from data/logs/cycles.csv</div>
+      </div>
+      <table class="history-table" id="historyTable">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Phase</th>
+            <th>NS Vehicles</th>
+            <th>EW Vehicles</th>
+            <th>Green Time</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr>
+            <td colspan="5" class="history-empty">No cycles logged yet - run traffic detection to populate</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="history-footer">Updates every 10 seconds • Load category: FREE/LIGHT/MODERATE/HEAVY</div>
+    </div>
+
     <div class="footer">
       <span>Engine: Python · OpenCV · YOLOv3 · Flask</span>
-      <span>Adaptive control: NS/EW queue sensing · Logged to data/logs/cycles.csv</span>
+      <span>Adaptive control: NS/EW queue sensing · Logged to data/logs/cycles.csv · History analytics</span>
     </div>
   </div>
 
@@ -252,18 +314,42 @@
       return "HEAVY";
     }
 
+    function updateHistory() {
+      fetch('/history')
+        .then(r => r.json())
+        .then(data => {
+          const tbody = document.getElementById('historyBody');
+          if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="history-empty">No data yet</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.map(cycle => `
+            <tr>
+              <td>${cycle.timestamp}</td>
+              <td style="font-weight: 600; color: var(--accent);">${cycle.phase}</td>
+              <td>${cycle.vehicle_ns}</td>
+              <td>${cycle.vehicle_ew}</td>
+              <td>${cycle.green_time}s</td>
+            </tr>
+          `).join('');
+        })
+        .catch(e => console.error('History update failed:', e));
+    }
+
     async function updateStatus() {
       try {
         const res = await fetch('/status');
         if (!res.ok) throw new Error('Status fetch failed');
         const data = await res.json();
 
-        const ns = data.vehicle_count_ns || 0;
-        const ew = data.vehicle_count_ew || 0;
-        const phase = data.phase || "-";
-        const remaining = data.remaining_time ?? "-";
+        // IMPORTANT: names must match your /status JSON:
+        // { "phase", "remaining_time", "green_time", "vehicle_ns", "vehicle_ew", "has_image" }
+        const ns = data.vehicle_ns || 0;
+        const ew = data.vehicle_ew || 0;
+        const phase = data.phase || "-";                      // CHANGED
+        const remaining = Math.ceil(data.remaining_time ?? 0);
         const greenTime = data.green_time ?? "-";
-        const hasImage = data.has_image;
+        const hasImage = data.has_image;                     // NEW
 
         document.getElementById('vehicleCountNS').textContent = ns;
         document.getElementById('vehicleCountEW').textContent = ew;
@@ -275,9 +361,9 @@
         document.getElementById('greenTime').textContent = greenTime + " s";
 
         const load = loadCategory(ns, ew);
-        const loadStatus = document.getElementById('loadStatus');
-        loadStatus.textContent = "Load: " + load;
+        document.getElementById('loadStatus').textContent = "Load: " + load;
 
+        // load image when available
         if (hasImage) {
           document.getElementById('trafficImage').src = '/image?ts=' + Date.now();
           document.getElementById('cameraStatus').textContent = "Feed: Live";
@@ -292,8 +378,11 @@
       }
     }
 
+    // Initial load + intervals
     updateStatus();
-    setInterval(updateStatus, 2000);
+    updateHistory();
+    setInterval(updateStatus, 1000);
+    setInterval(updateHistory, 10000);
   </script>
 </body>
 </html>
