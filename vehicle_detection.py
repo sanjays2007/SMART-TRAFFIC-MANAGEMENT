@@ -10,32 +10,15 @@ net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
 with open("coco.names", "r") as f:
     classes = f.read().strip().split("\n")
 
-def get_latest_image_path():
-    files = [
-        f for f in os.listdir(".")
-        if f.startswith("captured_image_") and f.endswith(".jpg")
-    ]
-    if not files:
-        return None
-    files.sort()
-    return files[-1]
-
-last_image_used = None
+IMAGE_PATH = "static/latest_frame.jpg"   # single live image from capture script
 
 while True:
-    image_path = get_latest_image_path()
-    if image_path is None:
+    if not os.path.exists(IMAGE_PATH):
         print("No captured images yet. Waiting...")
         time.sleep(2)
         continue
 
-    if image_path == last_image_used:
-        time.sleep(1)
-        continue
-    last_image_used = image_path
-
-    print(f"\nUsing image: {image_path}")
-    image = cv2.imread(image_path)
+    image = cv2.imread(IMAGE_PATH)
     if image is None:
         print("Failed to read image, skipping...")
         time.sleep(2)
@@ -79,8 +62,15 @@ while True:
                     color = (0, 191, 255)  # EW
 
                 cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
-                cv2.putText(image, "Vehicle", (x, y - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                cv2.putText(
+                    image,
+                    "Vehicle",
+                    (x, y - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    color,
+                    2,
+                )
 
     print(f"NS vehicles: {count_ns} | EW vehicles: {count_ew}")
 

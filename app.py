@@ -5,30 +5,26 @@ from datetime import datetime
 
 from flask import Flask, jsonify, render_template, send_file
 
+from controller import TrafficController   # NEW: use your smart controller
+
 app = Flask(__name__)
 
-# ------------------------------------------------------------------
-# SIMPLE CONTROLLER STATE (you can later wire this to controller.py)
-# ------------------------------------------------------------------
-controller_state = {
-    "current_phase": "EW",      # "NS" or "EW"
-    "phase_start_time": time.time(),
-    "green_time": 30,           # seconds for current green
-    "vehicle_ns": 0,
-    "vehicle_ew": 0,
-}
+# -------------------------------------------------------
+# SMART CONTROLLER INSTANCE
+# -------------------------------------------------------
+controller = TrafficController()  # uses config.py + internal CSV logging
 
-def compute_remaining_time():
-    elapsed = time.time() - controller_state["phase_start_time"]
-    remaining = controller_state["green_time"] - elapsed
-    return max(0, int(remaining))
 
-# ------------------------------------------------------------------
-# CSV LOGGING HELPER  data/logs/cycles.csv
-# ------------------------------------------------------------------
-def log_cycle(phase, ns_count, ew_count, green_time):
+# -------------------------------------------------------
+# EXTRA CSV LOGGING (OPTIONAL, can be removed if you only want controller.log)
+# -------------------------------------------------------
+def log_cycle_simple(phase, ns_count, ew_count, green_time):
+    """
+    Kept only if you still want app.py-side logging; otherwise not used.
+    History widget already reads the controller's CSV.
+    """
     os.makedirs("data/logs", exist_ok=True)
-    csv_path = "data/logs/cycles.csv"
+    csv_path = "data/logs/cycles_app.csv"
     file_exists = os.path.exists(csv_path)
 
     with open(csv_path, "a", newline="") as f:
@@ -54,78 +50,73 @@ def log_cycle(phase, ns_count, ew_count, green_time):
             }
         )
 
-# ------------------------------------------------------------------
+
+# -------------------------------------------------------
 # INDEX
-# ------------------------------------------------------------------
+# -------------------------------------------------------
 @app.route("/")
 def index():
     return render_template("index.html")
 
-# ------------------------------------------------------------------
-# STATUS  (used by dashboard JS)
-# ------------------------------------------------------------------
+
+# -------------------------------------------------------
+# STATUS (used by dashboard JS)
+# -------------------------------------------------------
 @app.route("/status")
 def status():
     """
-    JS expects:
-      phase            -> "NS" or "EW"
-      remaining_time   -> number
-      green_time       -> number
-      vehicle_ns       -> number
-      vehicle_ew       -> number
+    Frontend expects:
+      phase           -> "NS", "EW", "YELLOW", "ALL_RED"
+      remaining_time  -> number
+      green_time      -> number
+      vehicle_ns      -> number
+      vehicle_ew      -> number
+      has_image       -> bool
     """
-    # TODO: replace this block with real values from your detection/controller
-    # Example demo logic: alternate every 30 seconds
-    remaining = compute_remaining_time()
-    if remaining == 0:
-        controller_state["current_phase"] = (
-            "NS" if controller_state["current_phase"] == "EW" else "EW"
-        )
-        controller_state["phase_start_time"] = time.time()
-        controller_state["green_time"] = 30
-        remaining = compute_remaining_time()
 
-        # log one cycle when phase switches
-        log_cycle(
-            controller_state["current_phase"],
-            controller_state["vehicle_ns"],
-            controller_state["vehicle_ew"],
-            controller_state["green_time"],
-        )
+    # Read current counts from YOLO output text files
+    count_ns = 0
+    count_ew = 0
 
-    # here you can update vehicle_ns / vehicle_ew from txt or shared memory
     if os.path.exists("vehicle_count_ns.txt"):
         try:
             with open("vehicle_count_ns.txt") as f:
-                controller_state["vehicle_ns"] = int(f.read().strip() or 0)
+                count_ns = int(f.read().strip() or 0)
         except ValueError:
-            controller_state["vehicle_ns"] = 0
+            count_ns = 0
 
     if os.path.exists("vehicle_count_ew.txt"):
         try:
             with open("vehicle_count_ew.txt") as f:
-                controller_state["vehicle_ew"] = int(f.read().strip() or 0)
+                count_ew = int(f.read().strip() or 0)
         except ValueError:
-            controller_state["vehicle_ew"] = 0
+            count_ew = 0
+
+    # Ask smart controller for phase + timings + load
+    ui_phase, remaining, green_time, load = controller.update_phase(count_ns, count_ew)
 
     has_image = os.path.exists("static/latest_frame.jpg")
 
     return jsonify(
         {
-            "phase": controller_state["current_phase"],
+            "phase": ui_phase,
             "remaining_time": remaining,
-            "green_time": controller_state["green_time"],
-            "vehicle_ns": controller_state["vehicle_ns"],
-            "vehicle_ew": controller_state["vehicle_ew"],
+            "green_time": green_time,
+            "vehicle_ns": count_ns,
+            "vehicle_ew": count_ew,
             "has_image": has_image,
+            # Optional: expose load if you later show it in UI
+            # "load": load
         }
     )
 
-# ------------------------------------------------------------------
-# HISTORY  (last 10 rows of cycles.csv)
-# ------------------------------------------------------------------
+
+# -------------------------------------------------------
+# HISTORY (last 10 rows of controller CSV)
+# -------------------------------------------------------
 @app.route("/history")
 def history():
+    # controller already writes to data/logs/cycles.csv
     csv_path = "data/logs/cycles.csv"
     if not os.path.exists(csv_path):
         return jsonify([])
@@ -147,9 +138,10 @@ def history():
 
     return jsonify(cycles)
 
-# ------------------------------------------------------------------
-# IMAGE  (served to <img id="trafficImage"> when has_image = true)
-# ------------------------------------------------------------------
+
+# -------------------------------------------------------
+# IMAGE (served to <img id="trafficImage"> when has_image = true)
+# -------------------------------------------------------
 @app.route("/image")
 def image():
     """
@@ -161,7 +153,8 @@ def image():
         return send_file(img_path, mimetype="image/jpeg")
     return ("", 404)
 
-# ------------------------------------------------------------------
+
+# -------------------------------------------------------
 if __name__ == "__main__":
     # debug=True for development
     app.run(host="0.0.0.0", port=5000, debug=True)
